@@ -1,34 +1,28 @@
-name: deploy-to-github-pages
-
+name: Build and Deploy
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
+    branches:
+      - main  # デプロイをトリガーするブランチを指定
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2  # リポジトリをチェックアウト
 
-      - name: setup node.js
-        uses: actions/setup-node@v3.6.0
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'  # Node.jsのバージョンを指定
 
-      # package.jsonの内容でパッケージインストール
-      - name: setup app env
-        run: npm i
+      - name: Install dependencies
+        run: npm install
 
-      # ビルド実行、静的リソースを作る
-      - name: build static resources
-        run: npm run build
+      - name: Build
+        run: npm run build  # SvelteKitアプリをビルド
 
-      # GitHub Pagesにデプロイする
-      - name: deploy to github pages
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GH_API_TOKEN }}
-          # アプリ直下のbuildディレクトリに生成されるため、指定
-          publish_dir: build
+          github_token: ${{ secrets.GITHUB_TOKEN }}  # GitHubが提供するトークンを使用
+          publish_dir: ./build  # GitHub Pagesにデプロイするディレクトリを指定
